@@ -33,7 +33,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setTitle("Bank by Dariusz Paluch");
-        primaryStage.setScene(new Scene(rootNode, 500, 400));
+        primaryStage.setScene(new Scene(rootNode, 800, 700));
         primaryStage.setResizable(true);
         primaryStage.show();
 

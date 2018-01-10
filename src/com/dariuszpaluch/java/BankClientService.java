@@ -1,9 +1,6 @@
 package com.dariuszpaluch.java;
 
-import bank.wsdl.AuthenticateRequest;
-import bank.wsdl.AuthenticateResponse;
-import bank.wsdl.ServiceFault;
-import bank.wsdl.UserAuthenticateData;
+import bank.wsdl.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
@@ -18,6 +15,7 @@ import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPFaultElement;
 import javax.xml.transform.Source;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by Dariusz Paluch on 07.01.2018.
@@ -25,7 +23,7 @@ import java.util.Iterator;
 public class BankClientService extends WebServiceGatewaySupport {
   private static final Logger log = LoggerFactory.getLogger(BankClientService.class);
   private static BankClientService bankClientService;
-  String token;
+  private String token;
   private static String URI = Settings.soapEndpointUrl;
   private static SoapActionCallback soapActionCallback = new SoapActionCallback(Settings.soapAction);
 
@@ -40,7 +38,6 @@ public class BankClientService extends WebServiceGatewaySupport {
 
   private void handleServiceFault(ServiceFault serviceFault) {
     log.info("Code:" + serviceFault.getCode() + ", description " + serviceFault.getDescription());
-
   }
 
   public boolean tryAuthenticate(String login, String password) {
@@ -60,12 +57,6 @@ public class BankClientService extends WebServiceGatewaySupport {
       log.info("Authenticate success");
 
       return true;
-//        javax.xml.soap.SOAPFault fault = soapFaultException.getFault(); //<Fault> node
-//
-//        ServiceFault serviceFault = (ServiceFault) response;
-//        handleServiceFault(serviceFault);
-//        log.info("Authenticate failure");
-//      }
     }
     catch(SoapFaultClientException soapFaultClientException){
         SoapFault soapFault = soapFaultClientException.getSoapFault();
@@ -87,4 +78,44 @@ public class BankClientService extends WebServiceGatewaySupport {
       log.info("Authenticate failure");
       return false;
     }
+
+  public List<String> getUserAccounts() {
+    try {
+      log.info("Try get accounts");
+
+      GetUserAccountsRequest request = new GetUserAccountsRequest();
+      MyHeaders authorizationHeader = new MyHeaders();
+      authorizationHeader.setToken(token);
+      Object response = getWebServiceTemplate().marshalSendAndReceive(URI, request, new SecurityHeader(authorizationHeader));
+
+      GetUserAccountsResponse userAccountsResponse = (GetUserAccountsResponse) response;
+      log.info("SUCCESS get accounts");
+
+      return userAccountsResponse.getAccounts();
+    } catch(SoapFaultClientException soapFaultClientException){
+      log.info("Some problem with get all user accounts");
+    }
+
+    return null;
   }
+
+  public int getBalance(String selectedAccountNo) throws Exception {
+    try {
+      log.info("Try get balance of " + selectedAccountNo);
+
+      GetBalanceRequest request = new GetBalanceRequest();
+      request.setAccountNo(selectedAccountNo);
+      MyHeaders authorizationHeader = new MyHeaders();
+      authorizationHeader.setToken(token);
+      Object response = getWebServiceTemplate().marshalSendAndReceive(URI, request, new SecurityHeader(authorizationHeader));
+
+      GetBalanceResponse getBalanceResponse = (GetBalanceResponse) response;
+      log.info("get balance SUCCESS");
+
+      return getBalanceResponse.getBalance().getBalance();
+    } catch(SoapFaultClientException soapFaultClientException){
+      log.info("Some problem with get all user accounts");
+      throw new Exception("Some problem with get all user accounts");
+    }
+  }
+}

@@ -118,4 +118,87 @@ public class BankClientService extends WebServiceGatewaySupport {
       throw new Exception("Some problem with get all user accounts");
     }
   }
+
+  public SecurityHeader getSecurityHeader() {
+    MyHeaders authorizationHeader = new MyHeaders();
+    authorizationHeader.setToken(this.token);
+    return new SecurityHeader(authorizationHeader);
+
+  }
+
+  public String createBankAccountNo() throws Exception {
+    try {
+      log.info("Try create accountNo");
+
+      CreateAccountRequest request = new CreateAccountRequest();
+      Object response = getWebServiceTemplate().marshalSendAndReceive(URI, request, this.getSecurityHeader());
+      CreateAccountResponse createAccountResponse = (CreateAccountResponse) response;
+      return createAccountResponse.getAccountNo();
+    } catch(SoapFaultClientException soapFaultClientException){
+      log.info("Some problem with create account");
+      throw new Exception("Some problem with create account");
+    }
+  }
+
+  public void depositAmount(String selectedAccountNo, int ammount) throws Exception {
+    try {
+      log.info("Try deposit Amount");
+      DepositMoneyRequest request = new DepositMoneyRequest();
+      request.setAccountNo(selectedAccountNo);
+      request.setAmount(ammount);
+      Object response = getWebServiceTemplate().marshalSendAndReceive(URI, request, this.getSecurityHeader());
+      DepositMoneyResponse depositMoneyResponse = (DepositMoneyResponse) response;
+      if(!depositMoneyResponse.isResult()) {
+        throw new Exception("Some problem with deposit Money");
+      }
+
+    } catch(SoapFaultClientException soapFaultClientException){
+      log.info("Some problem with deposit money");
+      throw new Exception("Some problem with deposit Money");
+    }
+  }
+
+  public void withdrawMoney(String selectedAccountNo, int ammount) throws Exception {
+    try {
+      log.info("Try withdraw Amount");
+      WithdrawMoneyRequest request = new WithdrawMoneyRequest();
+      request.setAccountNo(selectedAccountNo);
+      request.setAmount(ammount);
+      Object response = getWebServiceTemplate().marshalSendAndReceive(URI, request, this.getSecurityHeader());
+      WithdrawMoneyResponse withdrawMoneyResponse = (WithdrawMoneyResponse) response;
+      if(!withdrawMoneyResponse.isResult()) {
+        throw new Exception("Some problem with withdraw Money");
+      }
+
+    } catch(SoapFaultClientException soapFaultClientException){
+      log.info("Some problem with withdraw money");
+      throw new Exception("Some problem with withdraw Money");
+    }
+  }
+
+  public void sendTransfer(String sourceAccountNo, String destinationAccountNo, String title, String name, int ammount) throws Exception {
+    try {
+      log.info("Try Transfer");
+      TransferRequest request = new TransferRequest();
+      Transfer transfer = new Transfer();
+      transfer.setSourceAccount(sourceAccountNo);
+      transfer.setDestinationAccount(destinationAccountNo);
+      transfer.setTitle(title);
+      transfer.setName(name);
+      transfer.setAmount(ammount);
+      request.setTransfer(transfer);
+
+
+      Object response = getWebServiceTemplate().marshalSendAndReceive(URI, request, this.getSecurityHeader());
+      TransferResponse transferResponse = (TransferResponse) response;
+
+      if(!transferResponse.isResult()) {
+        throw new Exception("Some problem with withdraw Money");
+      }
+
+    } catch(SoapFaultClientException soapFaultClientException){
+      log.info("Some problem with withdraw money");
+      throw new Exception("Some problem with withdraw Money");
+    }
+  }
 }

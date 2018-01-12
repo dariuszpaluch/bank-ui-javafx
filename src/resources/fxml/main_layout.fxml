@@ -27,6 +27,7 @@
         <FlowPane>
           <Text text="Selected account"/>
           <ChoiceBox fx:id="selectedAccount" minWidth="200"/>
+          <Button fx:id="createBankAccountNoButton" text="CREATE ACCOUNT"/>
         </FlowPane>
         <FlowPane orientation="VERTICAL">
           <FlowPane>
@@ -35,12 +36,20 @@
           </FlowPane>
           <FlowPane>
             <Button fx:id="depositMoneyButton" text="Deposit"/>
-            <TextField fx:id="depositAmountTextField" promptText="Deposit amount"/>
+            <TextField fx:id="depositAmountTextField" promptText="Deposit ammount"/>
           </FlowPane>
           <FlowPane>
             <Button fx:id="withdrawMoneyButton" text="Withdraw"/>
-            <Text fx:id="withdrawAmountTextField"/>
+            <TextField fx:id="withdrawAmountTextField"/>
           </FlowPane>
+        </FlowPane>
+        <FlowPane>
+          <Text>TRANSFER</Text>
+          <TextField fx:id="transferDestinationAccountNoTextField" promptText="DESTINATION ACCOUNT NO" />
+          <TextField fx:id="transferName" promptText="NAME"/>
+          <TextField fx:id="transferTitle" promptText="TITLE"/>
+          <TextField fx:id="transferAmmount" promptText="AMOUNT" />
+          <Button fx:id="sendTransferButton" text="SEND TRANSFER"/>
         </FlowPane>
       </FlowPane>
     </center>

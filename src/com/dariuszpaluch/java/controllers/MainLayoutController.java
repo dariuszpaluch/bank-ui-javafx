@@ -1,15 +1,14 @@
 package com.dariuszpaluch.java.controllers;
 
 import com.dariuszpaluch.java.BankClientService;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.text.Text;
 import org.springframework.stereotype.Component;
-import org.springframework.ws.soap.client.SoapFaultClientException;
 
 import java.util.List;
 
@@ -18,30 +17,34 @@ import java.util.List;
  */
 @Component
 public class MainLayoutController {
-  public Text errorText;
-  public ChoiceBox selectedAccount;
-  public BorderPane authorizedPane;
-  public FlowPane loginPane;
-  public Button getBalanceButton;
-  public Text balanceValue;
-  public Button depositMoneyButton;
-  public TextField depositAmountTextField;
-  public Button withdrawMoneyButton;
-  public TextField withdrawAmountTextField;
-  public Button createBankAccountNoButton;
-  public Button sendTransferButton;
-  public TextField transferDestinationAccountNoTextField;
-  public TextField transferName;
-  public TextField transferTitle;
-  public TextField transferAmmount;
 
+
+  public Button createBankAccountNoButton;
+  public ChoiceBox selectedAccountChoiceBox;
+  public Text balanceValue;
+  public Button sendTransferButton;
+  public TextField transferTitle;
+  public TextField transferName;
+  public TextField transferAmmount;
+  public TextField transferDestinationAccountNoTextField;
+  public Button depositMoneyButton;
+  public Button withdrawMoneyButton;
+  public TextField withdrawOrDepositAmount;
   private BankClientService bankClientService = BankClientService.getInstanceBankClientService();
 
 
   @FXML
   void initialize() {
+    updateListOfAccounts();
 //    getBalanceButton.setOnAction(this::onClickGetBalance);
-//    createBankAccountNoButton.setOnAction(this::onClickCreateBankAccountNo);
+    createBankAccountNoButton.setOnAction(this::onClickCreateBankAccountNo);
+    selectedAccountChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+      @Override
+      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+        updateAccountBalance((String)selectedAccountChoiceBox.getItems().get(newValue.intValue()));
+      }
+    });
+
 //    depositMoneyButton.setOnAction(this::onClickDepositMoneyButton);
 //    withdrawMoneyButton.setOnAction(this::onClickWithdrawMoneyButton);
 //    sendTransferButton.setOnAction(this::onClickSendTransferButton);
@@ -51,7 +54,7 @@ public class MainLayoutController {
 
   private void onClickSendTransferButton(ActionEvent actionEvent) {
     String destinationAccountNo = transferDestinationAccountNoTextField.getText();
-    String selectedAccountNo = selectedAccount.getSelectionModel().getSelectedItem().toString();
+    String selectedAccountNo = selectedAccountChoiceBox.getSelectionModel().getSelectedItem().toString();
     String title = transferTitle.getText();
     String name = transferName.getText();
     String ammount = transferAmmount.getText();
@@ -68,14 +71,14 @@ public class MainLayoutController {
   }
 
   private void onClickWithdrawMoneyButton(ActionEvent actionEvent) {
-    String selectedAccountNo = selectedAccount.getSelectionModel().getSelectedItem().toString();
-    String withdrawAmmountString = withdrawAmountTextField.getText();
+    String selectedAccountNo = selectedAccountChoiceBox.getSelectionModel().getSelectedItem().toString();
+    String withdrawAmmountString = withdrawOrDepositAmount.getText();
 
     if (!selectedAccountNo.isEmpty() && !withdrawAmmountString.isEmpty()) {
       int amount = Integer.parseInt(withdrawAmmountString);
       try {
         this.bankClientService.withdrawMoney(selectedAccountNo, amount);
-        withdrawAmountTextField.setText("0");
+        withdrawOrDepositAmount.setText("0");
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -84,16 +87,16 @@ public class MainLayoutController {
   }
 
   private void onClickDepositMoneyButton(ActionEvent actionEvent) {
-    String selectedAccountNo = selectedAccount.getSelectionModel().getSelectedItem().toString();
+    String selectedAccountNo = selectedAccountChoiceBox.getSelectionModel().getSelectedItem().toString();
 
-    String depositAmountString = depositAmountTextField.getText();
+    String depositAmountString = withdrawOrDepositAmount.getText();
 
     if (!selectedAccountNo.isEmpty() && !depositAmountString.isEmpty()) {
 
       try {
         int ammount = Integer.parseInt(depositAmountString);
         this.bankClientService.depositAmount(selectedAccountNo, ammount);
-        depositAmountTextField.setText("0");
+        withdrawOrDepositAmount.setText("0");
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -110,12 +113,16 @@ public class MainLayoutController {
   }
 
   private void onClickGetBalance(ActionEvent actionEvent) {
-    String selectedAccountNo = selectedAccount.getSelectionModel().getSelectedItem().toString();
+    String selectedAccountNo = selectedAccountChoiceBox.getSelectionModel().getSelectedItem().toString();
 
-    if (!selectedAccountNo.isEmpty()) {
+
+  }
+
+  public void updateAccountBalance(String accountNo) {
+    if (!accountNo.isEmpty()) {
       int balance = 0;
       try {
-        balance = this.bankClientService.getBalance(selectedAccountNo);
+        balance = this.bankClientService.getBalance(accountNo);
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -130,20 +137,10 @@ public class MainLayoutController {
 
   }
 
-  private void afterSuccessLogin() {
-    errorText.setText("SUCCESS");
-    loginPane.setVisible(false);
-    authorizedPane.setVisible(true);
-    this.setUserAccounts();
-  }
-
-  private void setUserAccounts() {
-    this.updateListOfAccounts();
-  }
-
   private void updateListOfAccounts() {
     List<String> accounts = bankClientService.getUserAccounts();
 
-    selectedAccount.setItems(FXCollections.observableArrayList(accounts));
+    selectedAccountChoiceBox.setItems(FXCollections.observableArrayList(accounts));
+    selectedAccountChoiceBox.getSelectionModel().selectFirst();
   }
 }

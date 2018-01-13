@@ -25,7 +25,7 @@ public class Main extends Application {
     @Override
     public void init() throws Exception {
         springContext = SpringApplication.run(Main.class);
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/main_layout.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
         fxmlLoader.setControllerFactory(springContext::getBean);
         rootNode = fxmlLoader.load();
     }
@@ -33,11 +33,11 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setTitle("Bank by Dariusz Paluch");
-        primaryStage.setScene(new Scene(rootNode, 800, 700));
+        primaryStage.setScene(new Scene(rootNode));
         primaryStage.setResizable(true);
         primaryStage.show();
 
-//        Parent root = FXMLLoader.load(getClass().getResource("/fxml/main_layout.fxml"));
+//        Parent root = FXMLLoader.load(getClass().getResource("/fxml/MainLayout.fxml"));
 //        primaryStage.setTitle("Bank by Dariusz Paluch");
 //        primaryStage.setScene(new Scene(root, 500, 400));
 //        primaryStage.setResizable(true);

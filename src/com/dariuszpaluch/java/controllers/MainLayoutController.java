@@ -5,9 +5,11 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.text.Text;
 import org.springframework.stereotype.Component;
+import org.springframework.ws.soap.client.SoapFaultClientException;
 
 import java.util.List;
 
@@ -16,13 +18,9 @@ import java.util.List;
  */
 @Component
 public class MainLayoutController {
-  public TextField login;
-  public TextField password;
-  public Button registrationButton;
-  public Button loginButton;
   public Text errorText;
   public ChoiceBox selectedAccount;
-  public FlowPane authorizedPane;
+  public BorderPane authorizedPane;
   public FlowPane loginPane;
   public Button getBalanceButton;
   public Text balanceValue;
@@ -42,24 +40,14 @@ public class MainLayoutController {
 
   @FXML
   void initialize() {
-    loginButton.setOnAction(this::onClickLoginButton);
-    getBalanceButton.setOnAction(this::onClickGetBalance);
-    createBankAccountNoButton.setOnAction(this::onClickCreateBankAccountNo);
-    depositMoneyButton.setOnAction(this::onClickDepositMoneyButton);
-    withdrawMoneyButton.setOnAction(this::onClickWithdrawMoneyButton);
-    sendTransferButton.setOnAction(this::onClickSendTransferButton);
+//    getBalanceButton.setOnAction(this::onClickGetBalance);
+//    createBankAccountNoButton.setOnAction(this::onClickCreateBankAccountNo);
+//    depositMoneyButton.setOnAction(this::onClickDepositMoneyButton);
+//    withdrawMoneyButton.setOnAction(this::onClickWithdrawMoneyButton);
+//    sendTransferButton.setOnAction(this::onClickSendTransferButton);
   }
 
-  private void showAlert(String message, Alert.AlertType type) {
-    Alert alert = new Alert(type);
-    alert.setTitle("Bank alert");
-    alert.setHeaderText(message);
-    alert.showAndWait();
-  }
 
-  private void showErrorAlert(String message) {
-    this.showAlert(message, Alert.AlertType.ERROR);
-  }
 
   private void onClickSendTransferButton(ActionEvent actionEvent) {
     String destinationAccountNo = transferDestinationAccountNoTextField.getText();
@@ -72,10 +60,10 @@ public class MainLayoutController {
       try {
         this.bankClientService.sendTransfer(selectedAccountNo, destinationAccountNo, title, name, Integer.parseInt(ammount));
       } catch (Exception e) {
-        showErrorAlert("Wrong transfer");
+//        showErrorAlert("Wrong transfer");
       }
     } else{
-      showErrorAlert("Invalid data to transfer");
+//      showErrorAlert("Invalid data to transfer");
     }
   }
 
@@ -138,18 +126,15 @@ public class MainLayoutController {
 
 
   private void onClickLoginButton(ActionEvent actionEvent) {
-    String login = this.login.getText();
-    String password = this.password.getText();
 
-    Boolean success = bankClientService.tryAuthenticate(login, password);
-    if (!success) {
-      errorText.setText("Wrong login or password. Try again");
-    } else {
-      errorText.setText("SUCCESS");
-      loginPane.setVisible(false);
-      authorizedPane.setVisible(true);
-      this.setUserAccounts();
-    }
+
+  }
+
+  private void afterSuccessLogin() {
+    errorText.setText("SUCCESS");
+    loginPane.setVisible(false);
+    authorizedPane.setVisible(true);
+    this.setUserAccounts();
   }
 
   private void setUserAccounts() {

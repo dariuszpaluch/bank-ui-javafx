@@ -73,7 +73,7 @@ public class BankClientService extends WebServiceGatewaySupport {
 
       return userAccountsResponse.getAccounts();
     } catch(SoapFaultClientException soapFaultClientException){
-      log.info("Some problem with get all user accounts");
+      log.info("Some problem with get all login accounts");
     }
 
     return null;
@@ -94,8 +94,8 @@ public class BankClientService extends WebServiceGatewaySupport {
 
       return getBalanceResponse.getBalance().getBalance();
     } catch(SoapFaultClientException soapFaultClientException){
-      log.info("Some problem with get all user accounts");
-      throw new Exception("Some problem with get all user accounts");
+      log.info("Some problem with get all login accounts");
+      throw new Exception("Some problem with get all login accounts");
     }
   }
 
@@ -172,9 +172,9 @@ public class BankClientService extends WebServiceGatewaySupport {
       Object response = getWebServiceTemplate().marshalSendAndReceive(URI, request, this.getSecurityHeader());
       TransferResponse transferResponse = (TransferResponse) response;
 
-      if(!transferResponse.isResult()) {
-        throw new Exception("Some problem with withdraw Money");
-      }
+//      if(!transferResponse.isResult()) {
+//        throw new Exception("Some problem with withdraw Money");
+//      }
 
     } catch(SoapFaultClientException soapFaultClientException){
       log.info("Some problem with withdraw money");

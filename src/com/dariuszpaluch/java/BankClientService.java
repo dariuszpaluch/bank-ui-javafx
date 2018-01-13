@@ -40,7 +40,7 @@ public class BankClientService extends WebServiceGatewaySupport {
     log.info("Code:" + serviceFault.getCode() + ", description " + serviceFault.getDescription());
   }
 
-  public boolean tryAuthenticate(String login, String password) {
+  public boolean tryAuthenticate(String login, String password) throws SoapFaultClientException {
 
     log.info("Requesting authenticate " + login + " " + password);
 
@@ -50,34 +50,14 @@ public class BankClientService extends WebServiceGatewaySupport {
     userAuthenticateData.setPassword(password);
     request.setUserAuthenticateData(userAuthenticateData);
 
-    try {
-      Object response = getWebServiceTemplate().marshalSendAndReceive(URI, request, soapActionCallback);
-      AuthenticateResponse authenticateResponse = (AuthenticateResponse) response;
-      token = authenticateResponse.getToken();
-      log.info("Authenticate success");
+    Object response = getWebServiceTemplate().marshalSendAndReceive(URI, request, soapActionCallback);
+    AuthenticateResponse authenticateResponse = (AuthenticateResponse) response;
+    token = authenticateResponse.getToken();
+    log.info("Authenticate success");
 
-      return true;
-    }
-    catch(SoapFaultClientException soapFaultClientException){
-        SoapFault soapFault = soapFaultClientException.getSoapFault();
-        SoapFaultDetail soapFaultDetail = soapFault.getFaultDetail();
-        Iterator<SoapFaultDetailElement> elements = soapFaultDetail.getDetailEntries();
-//
-//        ServiceFault serviceFault = new ServiceFault();
-        while(elements.hasNext()) {
-          SoapFaultDetailElement soapFaultDetailElement = elements.next();
-          if(soapFaultDetailElement.getName().toString().equals("code")) {
-            soapFaultDetailElement.getResult().getSystemId();
-          }
-          if(soapFaultDetailElement.getName().toString().equals("description")) {
-            System.out.println(soapFaultDetailElement.getName().toString());
-          }
-        }
-      }
+    return true;
 
-      log.info("Authenticate failure");
-      return false;
-    }
+  }
 
   public List<String> getUserAccounts() {
     try {

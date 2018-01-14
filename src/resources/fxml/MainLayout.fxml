@@ -23,13 +23,13 @@
         <menus>
           <Menu mnemonicParsing="false" text="Menu">
             <items>
-                  <MenuItem mnemonicParsing="false" text="Refresh" />
+                  <MenuItem fx:id="refreshMenuItem" mnemonicParsing="false" text="Refresh" />
               <MenuItem id="logoutMenuItem" mnemonicParsing="false" text="Logout" />
             </items>
           </Menu>
         </menus>
       </MenuBar>
-      <FlowPane prefHeight="49.0" prefWidth="600.0">
+      <FlowPane prefHeight="46.0" prefWidth="839.0">
          <children>
             <Button fx:id="createBankAccountNoButton" mnemonicParsing="false" text="CreateAccount">
                <FlowPane.margin>
@@ -41,7 +41,7 @@
                   <Insets right="10.0" />
                </FlowPane.margin>
             </ChoiceBox>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Stan konta:">
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Balance:">
                <FlowPane.margin>
                   <Insets right="5.0" />
                </FlowPane.margin>

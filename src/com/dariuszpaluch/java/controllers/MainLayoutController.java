@@ -43,6 +43,7 @@ public class MainLayoutController {
   public TableColumn destinationColumn;
   public TableColumn sourceColumn;
   public TableColumn dateColumn;
+  public MenuItem refreshMenuItem;
 
   private BankClientService bankClientService = BankClientService.getInstanceBankClientService();
 
@@ -54,13 +55,16 @@ public class MainLayoutController {
 //    getBalanceButton.setOnAction(this::onClickGetBalance);
     createBankAccountNoButton.setOnAction(this::onClickCreateBankAccountNo);
     selectedAccountChoiceBox.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
-      updateAccountBalance((String) selectedAccountChoiceBox.getItems().get(newValue.intValue()));
+      if((int)newValue >= 0) {
+        updateAccountBalance((String) selectedAccountChoiceBox.getItems().get(newValue.intValue()));
+      }
     });
 
 
     depositMoneyButton.setOnAction(this::onClickDepositMoneyButton);
     withdrawMoneyButton.setOnAction(this::onClickWithdrawMoneyButton);
     sendTransferButton.setOnAction(this::onClickSendTransferButton);
+    refreshMenuItem.setOnAction(this::onClickRefreshButton);
 
     amountColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, Integer>("amount"));
     typeColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, String>("operationType"));
@@ -70,6 +74,10 @@ public class MainLayoutController {
     destinationColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, String>("destinationAccount"));
     sourceColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, String>("sourceAccount"));
     dateColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, String>("operationDate"));
+  }
+
+  private void onClickRefreshButton(ActionEvent actionEvent) {
+    this.updateListOfAccounts();
   }
 
 
@@ -84,6 +92,10 @@ public class MainLayoutController {
       try {
         this.bankClientService.sendTransfer(selectedAccountNo, destinationAccountNo, title, name, Integer.parseInt(ammount));
         this.updateAccountBalance(selectedAccountNo);
+        transferAmmount.setText("0");
+        transferName.clear();
+        transferTitle.clear();
+        transferDestinationAccountNoTextField.clear();
       } catch (Exception e) {
 //        showErrorAlert("Wrong transfer");
       }

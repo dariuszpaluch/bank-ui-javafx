@@ -42,6 +42,7 @@ public class MainLayoutController {
   public TableColumn balanceColumn;
   public TableColumn destinationColumn;
   public TableColumn sourceColumn;
+  public TableColumn dateColumn;
 
   private BankClientService bankClientService = BankClientService.getInstanceBankClientService();
 
@@ -68,6 +69,7 @@ public class MainLayoutController {
     balanceColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, Integer>("balance"));
     destinationColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, String>("destinationAccount"));
     sourceColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, String>("sourceAccount"));
+    dateColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, String>("operationDate"));
   }
 
 
@@ -81,6 +83,7 @@ public class MainLayoutController {
     if (!destinationAccountNo.isEmpty() && !title.isEmpty() && !name.isEmpty() && !ammount.isEmpty() && !selectedAccountNo.isEmpty()) {
       try {
         this.bankClientService.sendTransfer(selectedAccountNo, destinationAccountNo, title, name, Integer.parseInt(ammount));
+        this.updateAccountBalance(selectedAccountNo);
       } catch (Exception e) {
 //        showErrorAlert("Wrong transfer");
       }
@@ -157,7 +160,7 @@ public class MainLayoutController {
       }
       balanceValue.setText(String.valueOf(balance));
     }
-    updateListOfAccountHistoryOperations();
+    updateListOfAccountHistoryOperations(accountNo);
   }
 
   private void updateListOfAccounts() {
@@ -166,11 +169,10 @@ public class MainLayoutController {
     selectedAccountChoiceBox.setItems(FXCollections.observableArrayList(accounts));
     selectedAccountChoiceBox.getSelectionModel().selectLast();
     updateAccountBalance(selectedAccountChoiceBox.getSelectionModel().getSelectedItem().toString());
-    updateListOfAccountHistoryOperations();
+//    updateListOfAccountHistoryOperations();
   }
 
-  public void updateListOfAccountHistoryOperations() {
-    String selectedAccountNo = selectedAccountChoiceBox.getSelectionModel().getSelectedItem().toString();
+  public void updateListOfAccountHistoryOperations(String selectedAccountNo) {
 
       if (!selectedAccountNo.isEmpty()) {
         List<OperationHistory> history = this.bankClientService.getAccountOperationHistory(selectedAccountNo);

@@ -1,5 +1,6 @@
 package com.dariuszpaluch.java.controllers;
 
+import bank.wsdl.OperationHistory;
 import com.dariuszpaluch.java.BankClientService;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -7,9 +8,12 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
 import org.springframework.stereotype.Component;
+import org.springframework.ws.soap.client.SoapFaultClientException;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -30,26 +34,41 @@ public class MainLayoutController {
   public Button depositMoneyButton;
   public Button withdrawMoneyButton;
   public TextField withdrawOrDepositAmount;
+  public TableView<OperationHistory> table;
+  public TableColumn amountColumn;
+  public TableColumn typeColumn;
+  public TableColumn titleColumn;
+  public TableColumn nameColumn;
+  public TableColumn balanceColumn;
+  public TableColumn destinationColumn;
+  public TableColumn sourceColumn;
+
   private BankClientService bankClientService = BankClientService.getInstanceBankClientService();
 
+  private AlertControler alertControler = new AlertControler();
 
   @FXML
   void initialize() {
     updateListOfAccounts();
 //    getBalanceButton.setOnAction(this::onClickGetBalance);
     createBankAccountNoButton.setOnAction(this::onClickCreateBankAccountNo);
-    selectedAccountChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-      @Override
-      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        updateAccountBalance((String)selectedAccountChoiceBox.getItems().get(newValue.intValue()));
-      }
+    selectedAccountChoiceBox.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+      updateAccountBalance((String) selectedAccountChoiceBox.getItems().get(newValue.intValue()));
     });
 
-//    depositMoneyButton.setOnAction(this::onClickDepositMoneyButton);
-//    withdrawMoneyButton.setOnAction(this::onClickWithdrawMoneyButton);
-//    sendTransferButton.setOnAction(this::onClickSendTransferButton);
-  }
 
+    depositMoneyButton.setOnAction(this::onClickDepositMoneyButton);
+    withdrawMoneyButton.setOnAction(this::onClickWithdrawMoneyButton);
+    sendTransferButton.setOnAction(this::onClickSendTransferButton);
+
+    amountColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, Integer>("amount"));
+    typeColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, String>("operationType"));
+    titleColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, String>("title"));
+    nameColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, String>("name"));
+    balanceColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, Integer>("balance"));
+    destinationColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, String>("destinationAccount"));
+    sourceColumn.setCellValueFactory(new PropertyValueFactory<OperationHistory, String>("sourceAccount"));
+  }
 
 
   private void onClickSendTransferButton(ActionEvent actionEvent) {
@@ -59,13 +78,13 @@ public class MainLayoutController {
     String name = transferName.getText();
     String ammount = transferAmmount.getText();
 
-    if (!destinationAccountNo.isEmpty() && !title.isEmpty() && !name.isEmpty() && !ammount.isEmpty() && !selectedAccountNo.isEmpty()){
+    if (!destinationAccountNo.isEmpty() && !title.isEmpty() && !name.isEmpty() && !ammount.isEmpty() && !selectedAccountNo.isEmpty()) {
       try {
         this.bankClientService.sendTransfer(selectedAccountNo, destinationAccountNo, title, name, Integer.parseInt(ammount));
       } catch (Exception e) {
 //        showErrorAlert("Wrong transfer");
       }
-    } else{
+    } else {
 //      showErrorAlert("Invalid data to transfer");
     }
   }
@@ -74,15 +93,22 @@ public class MainLayoutController {
     String selectedAccountNo = selectedAccountChoiceBox.getSelectionModel().getSelectedItem().toString();
     String withdrawAmmountString = withdrawOrDepositAmount.getText();
 
-    if (!selectedAccountNo.isEmpty() && !withdrawAmmountString.isEmpty()) {
-      int amount = Integer.parseInt(withdrawAmmountString);
-      try {
-        this.bankClientService.withdrawMoney(selectedAccountNo, amount);
-        withdrawOrDepositAmount.setText("0");
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+    try {
 
+      int amount = Integer.parseInt(withdrawAmmountString);
+      if (!withdrawAmmountString.isEmpty() && Integer.parseInt(withdrawAmmountString) > 0) {
+        try {
+          this.bankClientService.withdrawMoney(selectedAccountNo, amount);
+          withdrawOrDepositAmount.setText("0");
+          this.updateAccountBalance(selectedAccountNo);
+        } catch (SoapFaultClientException soapFaultClientException) {
+          this.alertControler.showErrorAlert(soapFaultClientException.getFaultStringOrReason());
+        }
+      } else {
+        this.alertControler.showErrorAlert("Wrong ammount value");
+      }
+    } catch (NumberFormatException e) {
+      this.alertControler.showErrorAlert("Wrong ammount value");
     }
   }
 
@@ -90,16 +116,21 @@ public class MainLayoutController {
     String selectedAccountNo = selectedAccountChoiceBox.getSelectionModel().getSelectedItem().toString();
 
     String depositAmountString = withdrawOrDepositAmount.getText();
+    int amount = Integer.parseInt(depositAmountString);
 
-    if (!selectedAccountNo.isEmpty() && !depositAmountString.isEmpty()) {
+    try {
+      if (!selectedAccountNo.isEmpty() && amount > 0) {
+        try {
 
-      try {
-        int ammount = Integer.parseInt(depositAmountString);
-        this.bankClientService.depositAmount(selectedAccountNo, ammount);
-        withdrawOrDepositAmount.setText("0");
-      } catch (Exception e) {
-        e.printStackTrace();
+          this.bankClientService.depositAmount(selectedAccountNo, amount);
+          withdrawOrDepositAmount.setText("0");
+          this.updateAccountBalance(selectedAccountNo);
+        } catch (SoapFaultClientException soapFaultClientException) {
+          this.alertControler.showErrorAlert(soapFaultClientException.getFaultStringOrReason());
+        }
       }
+    } catch (NumberFormatException e) {
+      this.alertControler.showErrorAlert("Wrong ammount value");
     }
   }
 
@@ -107,15 +138,13 @@ public class MainLayoutController {
     try {
       String accountNo = this.bankClientService.createBankAccountNo();
       this.updateListOfAccounts();
-    } catch (Exception e) {
-      e.printStackTrace();
+    } catch (SoapFaultClientException soapFaultClientException) {
+      this.alertControler.showErrorAlert(soapFaultClientException.getFaultStringOrReason());
     }
   }
 
   private void onClickGetBalance(ActionEvent actionEvent) {
     String selectedAccountNo = selectedAccountChoiceBox.getSelectionModel().getSelectedItem().toString();
-
-
   }
 
   public void updateAccountBalance(String accountNo) {
@@ -127,20 +156,26 @@ public class MainLayoutController {
         e.printStackTrace();
       }
       balanceValue.setText(String.valueOf(balance));
-
     }
-  }
-
-
-  private void onClickLoginButton(ActionEvent actionEvent) {
-
-
+    updateListOfAccountHistoryOperations();
   }
 
   private void updateListOfAccounts() {
     List<String> accounts = bankClientService.getUserAccounts();
 
     selectedAccountChoiceBox.setItems(FXCollections.observableArrayList(accounts));
-    selectedAccountChoiceBox.getSelectionModel().selectFirst();
+    selectedAccountChoiceBox.getSelectionModel().selectLast();
+    updateAccountBalance(selectedAccountChoiceBox.getSelectionModel().getSelectedItem().toString());
+    updateListOfAccountHistoryOperations();
+  }
+
+  public void updateListOfAccountHistoryOperations() {
+    String selectedAccountNo = selectedAccountChoiceBox.getSelectionModel().getSelectedItem().toString();
+
+      if (!selectedAccountNo.isEmpty()) {
+        List<OperationHistory> history = this.bankClientService.getAccountOperationHistory(selectedAccountNo);
+        Collections.reverse(history);
+        table.setItems(FXCollections.observableArrayList(history));
+      }
   }
 }

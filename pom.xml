@@ -69,7 +69,7 @@
           <generatePackage>bank.wsdl</generatePackage>
           <schemas>
             <schema>
-              <url>http://localhost:8080/ws/bank.wsdl</url>
+              <url>http://localhost:8090/ws/bank.wsdl</url>
             </schema>
           </schemas>
         </configuration>

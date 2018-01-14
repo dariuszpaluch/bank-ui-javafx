@@ -36,16 +36,7 @@ public class Main extends Application {
         primaryStage.setScene(new Scene(rootNode));
         primaryStage.setResizable(true);
         primaryStage.show();
-
-//        Parent root = FXMLLoader.load(getClass().getResource("/fxml/MainLayout.fxml"));
-//        primaryStage.setTitle("Bank by Dariusz Paluch");
-//        primaryStage.setScene(new Scene(root, 500, 400));
-//        primaryStage.setResizable(true);
-//        primaryStage.show();
     }
-//
-
-
 
     @Override
     public void stop() throws Exception {

@@ -10,6 +10,7 @@ import org.springframework.ws.soap.SoapFaultDetailElement;
 import org.springframework.ws.soap.client.SoapFaultClientException;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.soap.DetailEntry;
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPFaultElement;
@@ -60,9 +61,7 @@ public class BankClientService extends WebServiceGatewaySupport {
   }
 
   public List<String> getUserAccounts() {
-    try {
       log.info("Try get accounts");
-
       GetUserAccountsRequest request = new GetUserAccountsRequest();
       MyHeaders authorizationHeader = new MyHeaders();
       authorizationHeader.setToken(token);
@@ -70,17 +69,10 @@ public class BankClientService extends WebServiceGatewaySupport {
 
       GetUserAccountsResponse userAccountsResponse = (GetUserAccountsResponse) response;
       log.info("SUCCESS get accounts");
-
       return userAccountsResponse.getAccounts();
-    } catch (SoapFaultClientException soapFaultClientException) {
-      log.info("Some problem with get all login accounts");
-    }
-
-    return null;
   }
 
   public int getBalance(String selectedAccountNo) throws Exception {
-    try {
       log.info("Try get balance of " + selectedAccountNo);
 
       GetBalanceRequest request = new GetBalanceRequest();
@@ -93,10 +85,6 @@ public class BankClientService extends WebServiceGatewaySupport {
       log.info("get balance SUCCESS");
 
       return getBalanceResponse.getBalance().getBalance();
-    } catch (SoapFaultClientException soapFaultClientException) {
-      log.info("Some problem with get all login accounts");
-      throw new Exception("Some problem with get all login accounts");
-    }
   }
 
   public SecurityHeader getSecurityHeader() {
@@ -132,8 +120,7 @@ public class BankClientService extends WebServiceGatewaySupport {
     WithdrawMoneyResponse withdrawMoneyResponse = (WithdrawMoneyResponse) response;
   }
 
-  public void sendTransfer(String sourceAccountNo, String destinationAccountNo, String title, String name, int ammount) throws Exception {
-    try {
+  public void sendTransfer(String sourceAccountNo, String destinationAccountNo, String title, String name, int ammount) throws SoapFaultClientException {
       log.info("Try Transfer");
       TransferRequest request = new TransferRequest();
       Transfer transfer = new Transfer();
@@ -147,15 +134,6 @@ public class BankClientService extends WebServiceGatewaySupport {
 
       Object response = getWebServiceTemplate().marshalSendAndReceive(URI, request, this.getSecurityHeader());
       TransferResponse transferResponse = (TransferResponse) response;
-
-//      if(!transferResponse.isResult()) {
-//        throw new Exception("Some problem with withdraw Money");
-//      }
-
-    } catch (SoapFaultClientException soapFaultClientException) {
-      log.info("Some problem with withdraw money");
-      throw new Exception("Some problem with withdraw Money");
-    }
   }
 
   public List<OperationHistory> getAccountOperationHistory(String selectedAccountNo) throws SoapFaultClientException {

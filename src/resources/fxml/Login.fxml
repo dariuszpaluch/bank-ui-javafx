@@ -27,8 +27,8 @@
                         </Label>
                 <Label text="Username:" GridPane.rowIndex="1" />
                 <Label text="Password:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                <TextField fx:id="login" promptText="Use &quot;open&quot; to login" text="open" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <PasswordField fx:id="password" promptText="Use &quot;sesame&quot; to login" text="sesame" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <TextField fx:id="login" promptText="Login" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <PasswordField fx:id="password" promptText="Password" GridPane.columnIndex="1" GridPane.rowIndex="2" />
               </children>
               <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="148.0" minWidth="10.0" prefWidth="109.0" />

@@ -38,12 +38,17 @@ public class LoginController {
     String password = this.password.getText();
 
     try {
-      Boolean success = bankClientService.tryAuthenticate(login, password);
+      if(login.isEmpty() || password.isEmpty()) {
+        alertControler.showErrorAlert("Wrong login or password.");
+      }
+      else {
+        Boolean success = bankClientService.tryAuthenticate(login, password);
 
-      if (!success) {
-        alertControler.showErrorAlert("Wrong login or password. Try again");
-      } else {
-        this.goToAuthorizedView(actionEvent);
+        if (!success) {
+          alertControler.showErrorAlert("Wrong login or password. Try again");
+        } else {
+          this.goToAuthorizedView(actionEvent);
+        }
       }
 
     } catch (SoapFaultClientException soapFaultClientException) {

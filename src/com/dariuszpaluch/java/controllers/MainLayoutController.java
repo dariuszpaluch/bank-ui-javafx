@@ -96,11 +96,13 @@ public class MainLayoutController {
         transferName.clear();
         transferTitle.clear();
         transferDestinationAccountNoTextField.clear();
-      } catch (Exception e) {
-//        showErrorAlert("Wrong transfer");
+      } catch (SoapFaultClientException e) {
+        this.alertControler.showErrorAlert(e.getFaultStringOrReason());
+      } catch (NumberFormatException e) {
+        this.alertControler.showErrorAlert("Wrong ammount value");
       }
     } else {
-//      showErrorAlert("Invalid data to transfer");
+      this.alertControler.showErrorAlert("Invalid data to transfer");
     }
   }
 
@@ -109,44 +111,40 @@ public class MainLayoutController {
     String withdrawAmmountString = withdrawOrDepositAmount.getText();
 
     try {
-
       int amount = Integer.parseInt(withdrawAmmountString);
       if (!withdrawAmmountString.isEmpty() && Integer.parseInt(withdrawAmmountString) > 0) {
-        try {
           this.bankClientService.withdrawMoney(selectedAccountNo, amount);
           withdrawOrDepositAmount.setText("0");
           this.updateAccountBalance(selectedAccountNo);
-        } catch (SoapFaultClientException soapFaultClientException) {
-          this.alertControler.showErrorAlert(soapFaultClientException.getFaultStringOrReason());
-        }
       } else {
         this.alertControler.showErrorAlert("Wrong ammount value");
       }
     } catch (NumberFormatException e) {
       this.alertControler.showErrorAlert("Wrong ammount value");
-    }
+    } catch (SoapFaultClientException soapFaultClientException) {
+    this.alertControler.showErrorAlert(soapFaultClientException.getFaultStringOrReason());
+   }
   }
 
   private void onClickDepositMoneyButton(ActionEvent actionEvent) {
     String selectedAccountNo = selectedAccountChoiceBox.getSelectionModel().getSelectedItem().toString();
 
     String depositAmountString = withdrawOrDepositAmount.getText();
-    int amount = Integer.parseInt(depositAmountString);
 
     try {
+      int amount = Integer.parseInt(depositAmountString);
       if (!selectedAccountNo.isEmpty() && amount > 0) {
-        try {
-
           this.bankClientService.depositAmount(selectedAccountNo, amount);
           withdrawOrDepositAmount.setText("0");
           this.updateAccountBalance(selectedAccountNo);
-        } catch (SoapFaultClientException soapFaultClientException) {
-          this.alertControler.showErrorAlert(soapFaultClientException.getFaultStringOrReason());
-        }
+      } else {
+        this.alertControler.showErrorAlert("Wrong ammount value");
       }
     } catch (NumberFormatException e) {
       this.alertControler.showErrorAlert("Wrong ammount value");
-    }
+    } catch (SoapFaultClientException soapFaultClientException) {
+    this.alertControler.showErrorAlert(soapFaultClientException.getFaultStringOrReason());
+  }
   }
 
   private void onClickCreateBankAccountNo(ActionEvent actionEvent) {
